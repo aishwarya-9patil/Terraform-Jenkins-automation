@@ -1,18 +1,21 @@
 pipeline {
-
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: true, description: 'Automatically run apply after generating plan?')
     }
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')  // Fixed extra space
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
-    agent any
+    agent {
+        docker {
+            image 'hashicorp/terraform:latest'  // Use the official Terraform Docker image
+            args '-u root:root'  // Optional: run as root (can be removed if not needed)
+        }
+    }
 
     stages {
-
         stage('Checkout') {
             steps {
                 script {
@@ -25,9 +28,9 @@ pipeline {
 
         stage('Plan') {
             steps {
-                sh 'pwd; cd terraform/ ; terraform init'
-                sh 'pwd; cd terraform/ ; terraform plan -out=tfplan'
-                sh 'pwd; cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
+                sh 'terraform init'
+                sh 'terraform plan -out=tfplan'
+                sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
 
@@ -48,11 +51,8 @@ pipeline {
 
         stage('Apply') {
             steps {
-                sh 'pwd; cd terraform/ ; terraform apply -input=false tfplan'
+                sh 'terraform apply -input=false tfplan'
             }
         }
-
     }
-
 }
-
