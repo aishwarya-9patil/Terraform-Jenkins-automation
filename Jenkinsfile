@@ -26,6 +26,17 @@ pipeline {
             }
         }
 
+        stage('Docker Test') {
+            steps {
+                script {
+                    // Check Docker version
+                    sh 'docker --version'
+                    // List running containers (if any)
+                    sh 'docker ps'
+                }
+            }
+        }
+
         stage('Plan') {
             steps {
                 sh 'terraform init'
@@ -56,3 +67,4 @@ pipeline {
         }
     }
 }
+
