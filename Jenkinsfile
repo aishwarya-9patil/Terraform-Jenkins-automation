@@ -10,8 +10,8 @@ pipeline {
 
     agent {
         docker {
-            image 'hashicorp/terraform:latest'  // Use the official Terraform Docker image
-            args '-u root:root'  // Optional: run as root (can be removed if not needed)
+            image 'hashicorp/terraform:latest'
+            args '-u root:root --entrypoint=""'  // Disable entrypoint
         }
     }
 
@@ -26,14 +26,9 @@ pipeline {
             }
         }
 
-        stage('Docker Test') {
+        stage('Install Git') {
             steps {
-                script {
-                    // Check Docker version
-                    sh 'docker --version'
-                    // List running containers (if any)
-                    sh 'docker ps'
-                }
+                sh 'apt-get update && apt-get install -y git'  // Install Git
             }
         }
 
